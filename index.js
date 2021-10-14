@@ -1,24 +1,28 @@
-//Import packages, modules, scripts
-import express from 'express';
+// express - server
+// const express = require("express"); // third party package  type: commonjs
+import cors from "cors";
 import dotenv from "dotenv";
-import { managerRouter } from './routes/manager.js';
-import { userRouter } from './routes/user.js';
-
-//Initialization
-dotenv.config();
+import express from "express"; // latest syntax - type: module
+// .js at end MUST
+import { managerRouter } from "./routes/manager.js";
+import { usersRouter } from "./routes/users.js";
 const app = express();
-const PORT = process.env.PORT;
 
-//converts body present in the request into json format
+dotenv.config();
+const PORT = process.env.PORT; // Heroku will fill automatically
+// middleware data -> json format
 app.use(express.json());
+app.use(cors());
 
+// Checks all the requests for valid token
+// custom middleware
 
-app.get('/', function (request, response) {
-    response.send('Welcome to Mern Backend - Dev Env !!!')
-})
+app.get("/", (request, response) => {
+  response.send("Hello, All :) !!!");
+});
 
 app.use("/managers", managerRouter);
-app.use("/users", userRouter);
+app.use("/users", usersRouter);
 
-//call the connection function
-app.listen(PORT, () => console.log("Express Server Listening on port: " + PORT));
+
+app.listen(PORT, () => console.log("The server is started in ", PORT));

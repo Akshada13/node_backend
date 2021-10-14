@@ -1,59 +1,72 @@
-//Functions to perform Data Base CRUD operations
-async function getUserbyquery(client, id, response, color, age) {
-    const users = await client.db("users")
-        .collection("people").find({}).toArray();
+import bcrypt from "bcrypt";
+import { MongoClient } from "mongodb";
 
-    if (id) {
-        return response.send(users.filter((user) => user.id == id));
-    }
-
-    else if (color && age) {
-        return response.send(users.filter((user) => user.color == color && user.age > +age));
-    }
-
-    else if (color) {
-        return response.send(users.filter((user) => user.color == color));
-    }
-
-    else if (age) {
-        return response.send(users.filter((user) => user.age > +age));
-    }
-
-    else {
-        return response.send(users);
-    }
+async function getUsers(client) {
+  return await client.db("users").collection("people").find({}).toArray();
 }
 
-async function createUser(client, addUsers) {
-    return await client.db("users").collection("people").insertOne(addUsers);
+async function getMovies(client) {
+  return await client.db("users").collection("movies").find({}).toArray();
 }
 
-async function deleteUser(client, id) {
-    return await client.db("users").collection("people").deleteOne({ id: id });
+async function createUsers(client, addUsers) {
+  return await client.db("users").collection("people").insertMany(addUsers);
 }
 
-async function updateUserbyid(client, id, newData) {
-    return await client.db("users").collection("people").updateOne({ id: id }, { $set: newData });
+async function createMovies(client, addMovies) {
+  return await client.db("users").collection("movies").insertMany(addMovies);
 }
-async function createManager(client, username, hashPassword) {
-    return await client.db("users").collection("managers").insertOne({ username: username, password: hashPassword });
+
+async function updateUserById(client, id, newData) {
+  return await client
+    .db("users")
+    .collection("people")
+    .updateOne({ id: id }, { $set: newData });
+}
+
+async function deleteUserById(client, id) {
+  return await client.db("users").collection("people").deleteOne({ id: id });
+}
+
+async function getUserById(client, id) {
+  return await client.db("users").collection("people").findOne({ id: id });
+}
+
+async function createManager(client, username, hashedPassword) {
+  return await client
+    .db("users")
+    .collection("managers")
+    .insertOne({ username: username, password: hashedPassword });
 }
 
 async function getManagers(client) {
-    return await client.db("users").collection("managers").find({}).toArray();
+  return await client.db("users").collection("managers").find({}).toArray();
 }
 
-async function verifyManager(client, username) {
-    return await client.db("users").collection("managers").findOne({ username: username });
+async function genPassword(password) {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 }
+
+async function createConnection() {
+    // const MONGO_URL = "mongodb://localhost/users";
+    const MONGO_URL = process.env.MONGO_URL;
+    console.log(MONGO_URL);
+    const client = new MongoClient(MONGO_URL);
+    await client.connect();
+    console.log("Successfully connected!!!");
+    return client;
+  }
 
 
 export {
-    getUserbyquery,
-    createUser,
-    deleteUser,
-    updateUserbyid,
-    createManager,
-    getManagers,
-    verifyManager
-}
+  createManager,
+  createUsers,
+  deleteUserById,
+  getManagers,
+  getUserById,
+  getUsers,
+  updateUserById,
+  genPassword,
+  createConnection,
+};
