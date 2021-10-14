@@ -1,7 +1,8 @@
 //const express = require('express');
 import express from "express"; // latest syntax - type: module
 import { MongoClient } from "mongodb";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import bcrypt from "bcrypt"
 const app = express();
 
 dotenv.config();
@@ -35,6 +36,31 @@ async function createConnection() {
 
 app.get("/", (request, response) => {
     response.send("Hello All!!!");
+});
+
+async function genPassword(password){
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
+}
+
+app.post("/user/signup", async (request, response) => {
+  //const { color, ageGt } = request.query;
+  //const client = await createConnection();
+//console.log(request.body);
+  const { username, password } = request.body;
+  console.log(username, password);
+
+  //const result = await client
+    //.db("users")
+    //.collection("people")
+    //.insertMany(addUsers);
+  
+    //console.log(addUsers, result);
+    const hashedPassword = await genPassword(password);
+
+    console.log(hashedPassword);
+    response.send({username, password, hashedPassword});
+  
 });
 
 app.get("/users/:id", async (request, response) => {
